@@ -24,7 +24,7 @@ public class UserTurnsListServlet extends HttpServlet {
 		String password = (String) session.getAttribute("password");
 
 		// выполнение запроса в бд - получение списка турниров пользователя
-		Object selectTurnsListResult = new UserHibernateDao().selectUserTurnsList(login, password);
+		Object selectTurnsListResult = UserHibernateDao.getInstance().selectUserTurnsList(login, password);
 		if (selectTurnsListResult instanceof String
 				&& StringUtils.equals((String) selectTurnsListResult, "Error")) {
 			req.setAttribute("selectTurnsIsError", "Error");
@@ -50,7 +50,7 @@ public class UserTurnsListServlet extends HttpServlet {
 			String newTurnName = req.getParameter("newTurnName");
 			if (StringUtils.isNotEmpty(newTurnName)) {
 				// выполняем запрос в бд по добавлению нового турнира, записываем результат
-				String turnAddResult = new UserHibernateDao().addNewUserTurnament(newTurnName, login, password);
+				String turnAddResult = UserHibernateDao.getInstance().addNewUserTurnament(newTurnName, login, password);
 				req.setAttribute("turnAddResult", turnAddResult);
 			}
 			// возврат на страницу
@@ -62,7 +62,7 @@ public class UserTurnsListServlet extends HttpServlet {
 		String turnNameForDelete = req.getParameter("turnNameForDelete");
 		if (StringUtils.isNotEmpty(turnNameForDelete)) {
 			// выполняем запрос в бд по удалению выбранного турнира
-			new UserHibernateDao().deleteUserTurn(turnNameForDelete, login, password);
+			UserHibernateDao.getInstance().deleteUserTurn(turnNameForDelete, login, password);
 			// возврат на страницу
 			doGet(req, resp);
 			return;

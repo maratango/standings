@@ -43,7 +43,7 @@ public class ExistLoginServlet extends HttpServlet {
 		}
 
 		// выполнение запроса в бд - получение результата проверки существования логина-пароля
-		String userPassResult = new UserHibernateDao().checkAndPass(login, password);
+		String userPassResult = UserHibernateDao.getInstance().checkAndPass(login, password);
 		req.setAttribute("userPassed", userPassResult);
 
 		// возврат на текущую страницу, если такого логина-пароля не нашлось или произошла ошибка при запросе в бд

@@ -15,8 +15,11 @@ import java.util.Locale;
 
 public class UserHibernateDao {
 
+	private static UserHibernateDao instance = new UserHibernateDao();
+
 	private final SessionFactory factory;
 	private final HibernateTemplate hibernateTemplate;
+
 	private final String userCreateSql = "select fn_checkAndAddUser(:p_login, :p_password, :p_email)";
 	private final String userPassSql = "select exists(select 1 from users where " +
 			"upper(login) = upper(:p_login) and password = :p_password)";
@@ -44,6 +47,9 @@ public class UserHibernateDao {
 			" order by create_date desc";
 	private final String deleteTurnMatchSql = "delete from games where game_id = :p_matcheIdForDelete";
 
+	public static UserHibernateDao getInstance() {
+		return instance;
+	}
 
 	public UserHibernateDao() {
 		factory = new Configuration().configure().buildSessionFactory();
@@ -65,10 +71,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return userRegisterResult ? "OK" : "UserIsExist";
 	}
@@ -86,10 +88,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return userPassResult ? "OK" : "UserIsNotExist";
 	}
@@ -107,10 +105,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return selectTurnsListResult;
 	}
@@ -137,10 +131,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return selectTurnStandings;
 	}
@@ -159,10 +149,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return newTurnAddResult ? "OK" : "TurnIsExist";
 	}
@@ -181,10 +167,6 @@ public class UserHibernateDao {
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 	}
 
@@ -209,10 +191,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 	}
 
@@ -253,10 +231,6 @@ public class UserHibernateDao {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "Error";
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 		return selectTurnMatches;
 	}
@@ -273,10 +247,6 @@ public class UserHibernateDao {
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			if (factory != null) {
-				factory.close();
-			}
 		}
 	}
 }

@@ -40,7 +40,7 @@ public class RegLoginServlet extends HttpServlet {
 			return;
 		}
 		// выполнение запроса в бд и возврат ответа на страницу
-		String userRegisterResult = new UserHibernateDao().create(login, password, mail);
+		String userRegisterResult = UserHibernateDao.getInstance().create(login, password, mail);
 		req.setAttribute("userRegistered", userRegisterResult);
 		doGet(req, resp);
 	}

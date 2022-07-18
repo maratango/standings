@@ -41,7 +41,7 @@ public class TurnStandingsServlet extends HttpServlet {
 		String turnName = (String) session.getAttribute("turnName");
 
 		// выполнение запроса в бд - получение отсортированного списка строк "команда, очки, голы и т.д"
-		Object turnTable = new UserHibernateDao().selectTurnStandings(turnName, login, password);
+		Object turnTable = UserHibernateDao.getInstance().selectTurnStandings(turnName, login, password);
 		if (turnTable instanceof String
 				&& StringUtils.equals((String) turnTable, "Error")) {
 			req.setAttribute("selectTurnStandingsIsError", "Error");
@@ -50,7 +50,7 @@ public class TurnStandingsServlet extends HttpServlet {
 		}
 
 		// выполнение запроса в бд - получение списка матчей
-		Object turnMatchesFromBd = new UserHibernateDao().selectTurnMatches(turnName, login, password);
+		Object turnMatchesFromBd = UserHibernateDao.getInstance().selectTurnMatches(turnName, login, password);
 		if (turnMatchesFromBd instanceof String
 				&& StringUtils.equals((String) turnMatchesFromBd, "Error")) {
 			req.setAttribute("selectTurnMatchesIsError", "Error");
@@ -88,7 +88,7 @@ public class TurnStandingsServlet extends HttpServlet {
 			// проверяем "данные матча" на соответствие шаблону
 			if (newMatchDesc.matches("^.+\\s\\d{1,2}:\\d{1,2}\\s.+$")) {
 				// выполняем запрос в бд по добавлению нового матча, записываем результат
-				String matchAddResult = new UserHibernateDao().addNewTurnMatch(newMatchDesc, turnName, login, password);
+				String matchAddResult = UserHibernateDao.getInstance().addNewTurnMatch(newMatchDesc, turnName, login, password);
 				req.setAttribute("matchAddResult", matchAddResult);
 			} else {
 				req.setAttribute("matchAddResult", "matchDescIsInvalid");
@@ -102,7 +102,7 @@ public class TurnStandingsServlet extends HttpServlet {
 		String matcheIdForDelete = req.getParameter("matcheIdForDelete");
 		if (StringUtils.isNotEmpty(matcheIdForDelete)) {
 			// выполняем запрос в бд по удалению выбранного турнира
-			new UserHibernateDao().deleteTurnMatch(Integer.valueOf(matcheIdForDelete));
+			UserHibernateDao.getInstance().deleteTurnMatch(Integer.valueOf(matcheIdForDelete));
 			// возврат на страницу
 			doGet(req, resp);
 			return;
@@ -115,7 +115,7 @@ public class TurnStandingsServlet extends HttpServlet {
 				for (Object[] matcheFromFile : matchesFromFile) {
 					String newMatchDesc = matcheFromFile[0] + " " + matcheFromFile[1] + ":" +
 							matcheFromFile[3] + " " + matcheFromFile[2];
-					new UserHibernateDao().addNewTurnMatch(newMatchDesc, turnName, login, password);
+					UserHibernateDao.getInstance().addNewTurnMatch(newMatchDesc, turnName, login, password);
 				}
 			}
 			doGet(req, resp);
