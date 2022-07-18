@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<hibernate-configuration xmlns="http://www.hibernate.org/xsd/orm/cfg">
+    <session-factory>
+        <property name="connection.url">jdbc:postgresql://localhost:5432/standings_db</property>
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.username">system</property>
+        <property name="connection.password">apps</property>
+        <property name="show_sql">true</property>
+
+        <mapping resource="org/xcompany/xprojects/entities/Match.hbm.xml"/>
+        <mapping resource="org/xcompany/xprojects/entities/User.hbm.xml"/>
+    </session-factory>
+</hibernate-configuration>
