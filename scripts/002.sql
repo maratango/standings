@@ -50,6 +50,10 @@ ALTER TABLE games
 --2.3. сиквенс для генерации id(видимо)
 CREATE SEQUENCE HIBERNATE_SEQUENCE INCREMENT 1 START 1 no CYCLE;
 
+--2.4. вторичный ключ для games и связь с tournaments, настройка каскадного удаления
+ALTER TABLE games
+	ADD CONSTRAINT tournamentsFK FOREIGN KEY (tournament_id) REFERENCES tournaments(tournament_id) ON DELETE CASCADE;
+
 
 --3.1. турниры
 create table tournaments (
@@ -65,6 +69,29 @@ ALTER TABLE tournaments
 
 --3.3. сиквенс для генерации id турниры
 CREATE SEQUENCE tournamentsSequence INCREMENT 1 START 1 no CYCLE;
+
+--3.4. функция по добавлению нового Турнира пользователя
+CREATE OR REPLACE function fn_checkandaddtournament(p_newTurnName text, p_login text, p_password text)
+	RETURNS boolean
+	LANGUAGE plpgsql
+as $function$
+begin
+	lock table tournaments in ACCESS EXCLUSIVE mode;
+	if exists(select 1 from tournaments where
+		upper(name) = upper(p_newTurnName)
+		and owner_id = (select user_id from users where upper(login) = upper(p_login) and password = p_password))
+	then
+		return false;
+	else
+		insert into tournaments values(
+			nextval('tournamentsSequence'),
+			(select user_id from users where upper(login) = upper(p_login) and password = p_password),
+			p_newTurnName,
+			now());
+		return true;
+	end if;
+end;
+$function$;
 
 
 --4.1. Функция, которая по games считает турнирную таблицу по играм турнира
@@ -172,12 +199,15 @@ return;
 end;
 $function$
 ;
+
+---скрипты для проверки
 --------================================
 --------================================
 select * from users;
 select * from games;
-select * from tournaments;
+select * from tournaments order by create_date desc;
 select fn_checkAndAddUser('testL2', 'testP2', 'testE2');
+select fn_checkandaddtournament('Russian PL 2021/2022', 'test1', 'test1');
 select * from fn_turnStandings('England premier league 2021-2022', 'test1', 'test1');
 select * from usersSequence;
 select * from HIBERNATE_SEQUENCE;
@@ -187,6 +217,7 @@ drop table users;
 drop table games;
 drop table tournaments;
 drop function fn_checkAndAddUser(text, text, text);
+drop function fn_checkandaddtournament(text, text, text);
 drop function fn_turnStandings(text, text, text);
 drop sequence usersSequence;
 drop sequence HIBERNATE_SEQUENCE;
@@ -200,10 +231,38 @@ insert into tournaments values(nextval('tournamentsSequence'), 1, 'La liga 2021-
 insert into games values(nextval('HIBERNATE_SEQUENCE'), 1, 'Chelsea', 1, 'Manchester united', 0, now());
 insert into games values(nextval('HIBERNATE_SEQUENCE'), 1, 'Wigan', 0, 'Totenham', 3, now());
 insert into games values(nextval('HIBERNATE_SEQUENCE'), 1, 'Liverpool', 2, 'Manchester city', 2, now());
+insert into games values(nextval('HIBERNATE_SEQUENCE'), 2, 'Real Madrid', 2, 'Barcelona', 1, now());
+insert into games values(nextval('HIBERNATE_SEQUENCE'), 2, 'Athletico', 2, 'Celta', 0, now());
+--------------------------
+delete from tournaments where tournament_id = 2;
 -------------------------
 select exists(select 1 from users where upper(login) = upper('testL') and password = 'testP');
-select name from tournaments where owner_id = (select user_id from users where upper(login) = upper('test4') and password = 'test4');
+
+select name from tournaments where owner_id = (select user_id from users where upper(login) = upper('test1') and password = 'test1')
+order by create_date desc;
+
 select * from pg_stat_activity where application_name = 'PostgreSQL JDBC Driver';
+
+delete from tournaments where tournament_id = 
+(select tournament_id from tournaments where name = :p_turnNameForDelete and owner_id = 
+(select user_id from users where upper(login) = upper(:p_login) and password = :p_password));
+
+insert into games values(
+nextval('HIBERNATE_SEQUENCE'), 
+(select tournament_id from tournaments where name = 'England premier league 2021-2022' 
+and owner_id = (select user_id from users where upper(login) = upper('test1') and password = 'test1')), 
+'Leicester', 
+2, 
+'Everton', 
+0, 
+now());
+
+select game_id, home_team, home_goal, guest_team, guest_goal from games where tournament_id = 
+(select tournament_id from tournaments where name = 'England premier league 2021-2022' 
+and owner_id = (select user_id from users where upper(login) = upper('test1') and password = 'test1'))
+order by create_date desc;
+
+delete from games where game_id = ;
 --------================================
 --------================================
 
